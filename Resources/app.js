@@ -1,12 +1,34 @@
 // this sets the background color of the master UIView (when there are no windows/tab groups on it)
 Titanium.UI.setBackgroundColor('#000');
 Titanium.UI.iPhone.statusBarStyle = Titanium.UI.iPhone.StatusBar.OPAQUE_BLACK;
+
+var rip = Titanium.Media.createSound({
+	url:'paper.mp3',
+	preload:true,
+});
+
+var flip = Titanium.Media.createSound({
+	url:'flip.mp3',
+	preload:true,
+});
+
+var rejoin = Titanium.Media.createSound({
+	url:'rejoin.mp3',
+	preload:true,
+});
+
+var encode = Titanium.Media.createSound({
+	url:'encode.mp3',
+	preload:true,
+});
+
+
 //
 // create base UI tab and root window
 //
 var baseWindow = Titanium.UI.createWindow({  
-    title:'Tab 1',
     backgroundColor:'none',
+    zIndex:-10,
 });
 
 var topView = Titanium.UI.createView({
@@ -14,7 +36,6 @@ var topView = Titanium.UI.createView({
 	size:{height:Titanium.Platform.displayCaps.platformHeight,width:Titanium.Platform.displayCaps.platformWidth},
 	top:0,
 	backgroundImage:"top2.png",
-	zindex:1,
 });
 
 var middleView = Titanium.UI.createView({
@@ -22,7 +43,6 @@ var middleView = Titanium.UI.createView({
 	size:{height:Titanium.Platform.displayCaps.platformHeight,width:Titanium.Platform.displayCaps.platformWidth},
 	top:0,
 	backgroundImage:"middle2.png",
-	zindex:2,
 });
 
 var bottomView = Titanium.UI.createView({
@@ -30,7 +50,6 @@ var bottomView = Titanium.UI.createView({
 	size:{height:Titanium.Platform.displayCaps.platformHeight,width:Titanium.Platform.displayCaps.platformWidth},
 	top:0,
 	backgroundImage:"bottom2.png",
-	zindex:0,
 });
 
 var contentOverlay = Titanium.UI.createView({
@@ -42,19 +61,46 @@ var contentOverlay = Titanium.UI.createView({
 
 var messageText = Titanium.UI.createTextArea({
 	autocorrect:false,
-	value:"Hello hello hello hello hello hello hello hello hello hello hello hello hello Appcelerator FTW!",
+	value:"Please enter your message.",
 	font:{fontSize:24,fontFamily:"Comic Zine OT"},
 	color:"#aa224c",
 	backgroundColor:"none",
 	width:250, //you have to define the size in order for it to show up
 	height:200,
-	top:40,
+	top:100,
 	editable:true,
 	appearance:Titanium.UI.KEYBOARD_APPEARANCE_ALERT,
 });
 
+messageText.addEventListener('change',function(e){
+	if (e.source.value.length > 127) {
+			e.source.value = e.source.value.substring(0, 127);
+	}
+	Ti.App.fireEvent('checkText',{text:e.source.value,source:"messageText"});
+});
+
+messageText.addEventListener('focus',function(){
+	if (messageText.value == "Please enter your message.") {
+		messageText.value = "";
+	}
+});
+
+Ti.App.addEventListener('setText',function(e){
+	if (e.source == "secretWord") {
+		secretWordUI.value = e.text;
+	}
+	if (e.source == "messageText") {
+		messageText.value = e.text;
+	}
+});
+
 messageText.addEventListener('blur',function(){
-	secretButton.show();
+	if (messageText.value == "") {
+		messageText.value = "Please enter your message.";
+	}
+	else {
+		secretButton.show();	
+	}
 });
 
 contentOverlay.add(messageText);
@@ -83,16 +129,16 @@ secretButton.addEventListener('click',function(){
 	if (encodeSwitch){
 		encodeSwitch.hide();
 		secretButton.hide();
-	}
-
+	}	
+	
 	middleView.animate({top:0,duration:250});
 	bottomView.animate({top:0,duration:250}, function(){
 
 	var w = Ti.UI.createWindow({
 		backgroundImage:'paper2.png'
 	});
-	
-	var secretWord = Titanium.UI.createTextField({
+		
+	var secretWordUI = Titanium.UI.createTextField({
 		autocorrect: false,
 		height:32,
 		hintText:"Enter a secret word",
@@ -105,27 +151,42 @@ secretButton.addEventListener('click',function(){
 		appearance:Titanium.UI.KEYBOARD_APPEARANCE_ALERT,
 	});
 	
-	secretWord.addEventListener('blur',function(){
-		if (secretWord.value.length < 2) {
-			secretWord.focus();
-			alert("Please enter at least 2 characters");
+	var a = Titanium.UI.createAlertDialog({
+		title:'Warning',
+		message:'Please enter at least 2 characters',
+	});
+		
+	secretWordUI.addEventListener('change',function(e){
+		var contentLength = e.source.value.length;
+		if (contentLength > 7) e.source.value = e.source.value.substring(0, 7);
+		Ti.App.fireEvent('checkText',{text:e.source.value,source:"secretWord"});
+	});	
+		
+	secretWordUI.addEventListener('blur',function(e){
+		if (secretWordUI.value.length < 2) {
+			secretWordUI.focus();
+			a.show();
 			Titanium.Media.vibrate();
 		}
 		else {
+		Ti.App.fireEvent('encodeHash',{text:e.source.value});
 		secretButton.title = "";
 		var timer = setTimeout(function(){
+			rip.play();
 			middleView.animate({top:30, duration:250}); //animations can take an optional callback function which makes stringing functions together super easy
 			bottomView.animate({top:30, duration:250}, function(){
 				encodeSwitch.show();
 				secretButton.show();
-				secretButton.title = secretWord.value;
+				secretButton.title = secretWordUI.value;
 			});	
 		},500);
+		flip.play();
 		w.close();
 		}
 		});
 	
-	w.add(secretWord);
+	w.add(secretWordUI);
+	flip.play();
 	w.open({modal:true,modalTransitionStyle:Ti.UI.iPhone.MODAL_TRANSITION_STYLE_PARTIAL_CURL,modalStyle:Ti.UI.iPhone.MODAL_PRESENTATION_PAGESHEET,navBarHidden:true});
 	});
 });
@@ -141,16 +202,34 @@ encodeSwitch.hide();
 
 encodeSwitch.addEventListener('change',function(){
 	if (encodeSwitch.value) {
+		
+		rip.play();
 		bottomView.animate({top:80, duration:250}, function(){
 			sendButton.animate({opacity:1,duration:150});
-			resetButton.animate({opacity:1,duration:150});
+			resetButton.animate({opacity:1,duration:150}, function(){
+				Ti.App.fireEvent('encodeText',{text:messageText.value});	
+				var counter = 0;
+				
+				var timer = setInterval(function(){
+					if (counter < originalMessage.length+1) {
+						messageText.value = secretMessage.substr(0,counter)+originalMessage.substr(counter+1);
+						counter ++;
+					}
+					else {
+						inited = true;
+						clearInterval(timer);
+					}
+				},25);		
+			});
 		});
 		messageText.editable = false;
 		messageText.color = "#666";
 		secretButton.enabled = false;
 		secretButton.color = "#666";
 	}
-	else {
+	
+	else if (!encodeSwitch.value && inited) {
+		rejoin.play();
 		bottomView.animate({top:-30, duration:250});
 		sendButton.animate({opacity:0,duration:150});
 		resetButton.animate({opacity:0,duration:150});
@@ -158,6 +237,30 @@ encodeSwitch.addEventListener('change',function(){
 		messageText.color = "#aa224c";
 		secretButton.enabled = true;
 		secretButton.color = "#aa224c";
+
+		var counter = originalMessage.length+1;
+				
+		var timer = setInterval(function(){
+			if (counter >= 0) {
+				messageText.value = secretMessage.substr(0,counter)+originalMessage.substr(counter);
+				counter --;
+			}
+			else {
+				clearInterval(timer);
+			}
+		},25);
+	}
+	
+	else {
+		rejoin.play();
+		bottomView.animate({top:-30, duration:250});
+		sendButton.animate({opacity:0,duration:150});
+		resetButton.animate({opacity:0,duration:150});
+		messageText.editable = true;
+		messageText.color = "#aa224c";
+		secretButton.enabled = true;
+		secretButton.color = "#aa224c";
+		
 	}
 });
 
@@ -179,6 +282,10 @@ var sendButton = Titanium.UI.createButton({
 
 contentOverlay.add(sendButton);
 sendButton.opacity = 0;
+
+sendButton.addEventListener('click',function(){
+	Ti.App.fireEvent('sendTweet',{data:1});
+});
 
 var resetButton = Titanium.UI.createButton({
 	title:"Reset",
@@ -220,3 +327,5 @@ baseWindow.add(middleView);
 baseWindow.add(bottomView);
 baseWindow.add(contentOverlay);
 baseWindow.open();
+
+Ti.include('model.js');
