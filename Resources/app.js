@@ -2,6 +2,7 @@
 Titanium.UI.setBackgroundColor('#000');
 Titanium.UI.iPhone.statusBarStyle = Titanium.UI.iPhone.StatusBar.OPAQUE_BLACK;
 
+
 var rip = Titanium.Media.createSound({
 	url:'paper.mp3',
 	preload:true,
@@ -22,14 +23,29 @@ var encode = Titanium.Media.createSound({
 	preload:true,
 });
 
-
 //
 // create base UI tab and root window
 //
 var baseWindow = Titanium.UI.createWindow({  
     backgroundColor:'none',
     zIndex:-10,
+    navBarHidden:true,
 });
+
+baseWindow.addEventListener('dblclick', function(){
+	var win2 = Titanium.UI.createWindow({  
+    	url:"screen2.js"
+   		//backgroundColor:'#000',
+    	//fullscreen:true,	
+	});
+	win2.open({transition:Ti.UI.iPhone.AnimationStyle.FLIP_FROM_RIGHT});
+	win2.addEventListener('dblclick', function(){
+		win2.close({transition:Ti.UI.iPhone.AnimationStyle.FLIP_FROM_LEFT,});
+		baseWindow.show();
+	});
+	baseWindow.hide();
+});
+
 
 var topView = Titanium.UI.createView({
 	backgroundColor:"none",
@@ -269,7 +285,7 @@ var sendButton = Titanium.UI.createButton({
 	font:{fontSize:20,fontFamily:"Comic Zine OT"},
 	color:"#aa224c",
 	backgroundColor:"fffff4",
-	top:400,
+	top:350,
 	left:40,
 	height:40,
 	width:60,
@@ -284,6 +300,7 @@ contentOverlay.add(sendButton);
 sendButton.opacity = 0;
 
 sendButton.addEventListener('click',function(){
+	Ti.App.fireEvent('checkOAuth',{data:1});
 	Ti.App.fireEvent('sendTweet',{data:1});
 });
 
