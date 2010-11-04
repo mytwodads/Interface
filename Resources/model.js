@@ -3,6 +3,7 @@ Ti.include('functions.js');
 	
 	var secretWord = ""; //global hashtag holder
 	var secretMessage = ""; //global message holder
+	var duration = 86400;
 	
 	var theCode = ""; //numerical code
 	var originalMessage = "";
@@ -23,7 +24,11 @@ Ti.include('functions.js');
 	});
 		
 	Ti.App.addEventListener('encodeHash',function(e) {
-			getRequest("http://chinaalbino.com/validator1.php?h="+e.text+"&c=1");
+			getRequest("http://chinaalbino.com/databaser1.php?n="+e.text+"&c=1");
+	});
+	
+	Ti.App.addEventListener('decodeHash',function(e) {
+			getRequest("http://chinaalbino.com/databaser1.php?n="+e.text+"&p="+e.number+"&c=2");
 	});
 	
 	Ti.App.addEventListener('encodeText',function(e) {
@@ -262,7 +267,7 @@ Ti.include('functions.js');
 		var theHashy = hashTag;
 		theHashy = encodeURIComponent(theHashy);
 		var theMessage = encodeURIComponent(messageText);
-		xhr.open("GET", "http://chinaalbino.com/databaser1.php?m="+theMessage+"&h="+theHashy);
+		xhr.open("GET", "http://chinaalbino.com/databaser1.php?m="+theMessage+"&h="+theHashy+"&d="+duration);
 		xhr.onreadystatechange = function(status, response) {
 	   		if(status >= 200 && status <= 300) {
 	    		onSuccess(response);

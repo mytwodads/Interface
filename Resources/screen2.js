@@ -3,6 +3,7 @@ Titanium.UI.setBackgroundColor('#000');
 Titanium.UI.iPhone.statusBarStyle = Titanium.UI.iPhone.StatusBar.OPAQUE_BLACK;
 var win = Ti.UI.currentWindow;
 
+var code = ""; //global to hold numerical code once entered
 var started = false; //boolean for decodeSwitch to keep it from doing anything funny.
 /*
 var encode = Titanium.Media.createSound({
@@ -52,16 +53,16 @@ var waitIndicator = Titanium.UI.createActivityIndicator({color:"white",message:"
 waitIndicator.show();
 waitView.add(waitIndicator);
 
-var picker = Ti.UI.createPicker({
-	selectionIndicator:true,
-});
-
 Ti.App.addEventListener('waitForNetwork',function(e) {
 	waitView.show();
 });
 
 Ti.App.addEventListener('returnFromNetwork',function(e) {
 	waitView.hide();
+});
+
+var picker = Ti.UI.createPicker({
+	selectionIndicator:true,
 });
 
 var column1 = Ti.UI.createPickerColumn({opacity:0});
@@ -123,26 +124,6 @@ column5.addRow(Ti.UI.createPickerRow({title:'6',custom_item:'6'}));
 column5.addRow(Ti.UI.createPickerRow({title:'7',custom_item:'7'}));
 column5.addRow(Ti.UI.createPickerRow({title:'8',custom_item:'8'}));
 column5.addRow(Ti.UI.createPickerRow({title:'9',custom_item:'9'}));
-column5.addRow(Ti.UI.createPickerRow({title:'0',custom_item:'0'}));
-column5.addRow(Ti.UI.createPickerRow({title:'1',custom_item:'1'}));
-column5.addRow(Ti.UI.createPickerRow({title:'2',custom_item:'2'}));
-column5.addRow(Ti.UI.createPickerRow({title:'3',custom_item:'3'}));
-column5.addRow(Ti.UI.createPickerRow({title:'4',custom_item:'4'}));
-column5.addRow(Ti.UI.createPickerRow({title:'5',custom_item:'5'}));
-column5.addRow(Ti.UI.createPickerRow({title:'6',custom_item:'6'}));
-column5.addRow(Ti.UI.createPickerRow({title:'7',custom_item:'7'}));
-column5.addRow(Ti.UI.createPickerRow({title:'8',custom_item:'8'}));
-column5.addRow(Ti.UI.createPickerRow({title:'9',custom_item:'9'}));
-column5.addRow(Ti.UI.createPickerRow({title:'0',custom_item:'0'}));
-column5.addRow(Ti.UI.createPickerRow({title:'1',custom_item:'1'}));
-column5.addRow(Ti.UI.createPickerRow({title:'2',custom_item:'2'}));
-column5.addRow(Ti.UI.createPickerRow({title:'3',custom_item:'3'}));
-column5.addRow(Ti.UI.createPickerRow({title:'4',custom_item:'4'}));
-column5.addRow(Ti.UI.createPickerRow({title:'5',custom_item:'5'}));
-column5.addRow(Ti.UI.createPickerRow({title:'6',custom_item:'6'}));
-column5.addRow(Ti.UI.createPickerRow({title:'7',custom_item:'7'}));
-column5.addRow(Ti.UI.createPickerRow({title:'8',custom_item:'8'}));
-column5.addRow(Ti.UI.createPickerRow({title:'9',custom_item:'9'}));
 
 var column6 = Ti.UI.createPickerColumn({opacity:0});
 column6.addRow(Ti.UI.createPickerRow({title:'0',custom_item:'0'}));
@@ -155,28 +136,6 @@ column6.addRow(Ti.UI.createPickerRow({title:'6',custom_item:'6'}));
 column6.addRow(Ti.UI.createPickerRow({title:'7',custom_item:'7'}));
 column6.addRow(Ti.UI.createPickerRow({title:'8',custom_item:'8'}));
 column6.addRow(Ti.UI.createPickerRow({title:'9',custom_item:'9'}));
-column6.addRow(Ti.UI.createPickerRow({title:'0',custom_item:'0'}));
-column6.addRow(Ti.UI.createPickerRow({title:'1',custom_item:'1'}));
-column6.addRow(Ti.UI.createPickerRow({title:'2',custom_item:'2'}));
-column6.addRow(Ti.UI.createPickerRow({title:'3',custom_item:'3'}));
-column6.addRow(Ti.UI.createPickerRow({title:'4',custom_item:'4'}));
-column6.addRow(Ti.UI.createPickerRow({title:'5',custom_item:'5'}));
-column6.addRow(Ti.UI.createPickerRow({title:'6',custom_item:'6'}));
-column6.addRow(Ti.UI.createPickerRow({title:'7',custom_item:'7'}));
-column6.addRow(Ti.UI.createPickerRow({title:'8',custom_item:'8'}));
-column6.addRow(Ti.UI.createPickerRow({title:'9',custom_item:'9'}));
-column6.addRow(Ti.UI.createPickerRow({title:'0',custom_item:'0'}));
-column6.addRow(Ti.UI.createPickerRow({title:'1',custom_item:'1'}));
-column6.addRow(Ti.UI.createPickerRow({title:'2',custom_item:'2'}));
-column6.addRow(Ti.UI.createPickerRow({title:'3',custom_item:'3'}));
-column6.addRow(Ti.UI.createPickerRow({title:'4',custom_item:'4'}));
-column6.addRow(Ti.UI.createPickerRow({title:'5',custom_item:'5'}));
-column6.addRow(Ti.UI.createPickerRow({title:'6',custom_item:'6'}));
-column6.addRow(Ti.UI.createPickerRow({title:'7',custom_item:'7'}));
-column6.addRow(Ti.UI.createPickerRow({title:'8',custom_item:'8'}));
-column6.addRow(Ti.UI.createPickerRow({title:'9',custom_item:'9'}));
-
-
 
 // 6 columns as an array
 picker.add([column1,column2,column3,column4,column5,column6]);
@@ -211,11 +170,10 @@ var retrieveButton = Titanium.UI.createButton({
 });
 
 retrieveButton.addEventListener('click',function(){
-	var code = "";
 	for (var i = 0; i < 6; i++) {
 		code += picker.getSelectedRow(i).title;
 	}
-	Ti.App.fireEvent('getCode',{data:code});
+	Ti.App.fireEvent('getCode',{data:code.substring(code.length-6,code.length)});
 });
 
 contentOverlay.add(retrieveButton);
@@ -258,7 +216,7 @@ secretWordSlot.addEventListener('blur',function(){
 	}
 	else {
 		Ti.App.fireEvent('waitForNetwork',{name:'waitView'});
-		Ti.App.fireEvent('encodeHash',{text:secretWordSlot.value});
+		Ti.App.fireEvent('decodeHash',{text:secretWordSlot.value,number:code});
 	}
 });
 
