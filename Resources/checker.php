@@ -26,11 +26,23 @@ $time = time();
 		# Run the query on the database through the connection
 		$result = mysql_query($SqlStatement,$connection);
 		if (!$result) die("Error " . mysql_errno() . " : " . mysql_error());
-		echo("success");
 	
 #########################################################
 # Disconnect from the database.
 #########################################################
 mysql_close($connection);
+
+$validString = "1234567890qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
+$myFile = "offset.php";
+$stringData = "<?php \$offset='";
+$stringHolder = "";
+for ($i = 0; $i < 32; $i++) {
+	$index = rand(0,strlen($validString)-1);
+	$stringHolder = $stringHolder.$validString[$index];
+}
+$stringData = $stringData.$stringHolder."'; ?>";
+$fh = fopen($myFile, 'w') or die("can't open file");
+fwrite($fh, $stringData);
+fclose($fh);
 
 ?>

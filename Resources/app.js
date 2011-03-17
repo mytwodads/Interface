@@ -7,9 +7,42 @@ Titanium.UI.iPhone.statusBarStyle = Titanium.UI.iPhone.StatusBar.OPAQUE_BLACK;
 //
 var baseWindow = Titanium.UI.createWindow({  
     backgroundColor:'none',
-    zIndex:-10,
+    backgroundImage:'mainbg.png',
     navBarHidden:true,
+    zIndex:-11,
 });
+
+var tabGroup = Ti.UI.createTabGroup();
+
+var writeTab = Ti.UI.createTab({
+	icon:'',
+	title:"Send",
+	window:baseWindow
+});
+
+var retrieveWindow = Ti.UI.createWindow({
+	url:'screen2.js',
+	navBarHidden:true,
+	zIndex:-11,
+});
+
+var retrieveTab = Ti.UI.createTab({
+	icon:'',
+	title:"Retrieve",
+	window:retrieveWindow
+});
+
+tabGroup.addTab(writeTab);
+tabGroup.addTab(retrieveTab);
+
+tabGroup.open();
+
+var introImageView = Ti.UI.createImageView({
+	backgroundImage:'poirot.png',
+	zIndex:-10,
+});
+
+baseWindow.add(introImageView);
 
 baseWindow.addEventListener('dblclick', function(){
 	var win2 = Titanium.UI.createWindow({  
@@ -242,7 +275,7 @@ secretButton.addEventListener('click',function(){
 		
 	secretWordUI.addEventListener('change',function(e){
 		var contentLength = e.source.value.length;
-		if (contentLength > 7) e.source.value = e.source.value.substring(0, 7);
+		if (contentLength > 20) e.source.value = e.source.value.substring(0, 20);
 		Ti.App.fireEvent('checkText',{text:e.source.value,source:"secretWord"});
 	});	
 		
@@ -318,6 +351,7 @@ encodeSwitch.addEventListener('change',function(){
 	}
 });
 
+/*
 var sendButton = Titanium.UI.createButton({
 	title:"Tweet",
 	font:{fontSize:20,fontFamily:"Comic Zine OT"},
@@ -332,11 +366,41 @@ var sendButton = Titanium.UI.createButton({
 	borderColor:"#fffff4",
 	style:Titanium.UI.iPhone.SystemButtonStyle.PLAIN
 });
+*/
+
+var retrieveButton = Titanium.UI.createButton({
+	backgroundImage:'retrieveButton.png',
+	top:320,
+	left:48,
+	height:58,
+	width:227,
+	borderColor:"none",
+	borderWidth:0,
+	borderRadius:0,
+	borderColor:"#fffff4",
+	style:Titanium.UI.iPhone.SystemButtonStyle.PLAIN
+});
+
+baseWindow.add(retrieveButton);
+
+var sendButton = Titanium.UI.createButton({
+	backgroundImage:'sendButton.png',
+	top:387,
+	left:48,
+	height:58,
+	width:227,
+	borderColor:"none",
+	borderWidth:0,
+	borderRadius:0,
+	borderColor:"#fffff4",
+	style:Titanium.UI.iPhone.SystemButtonStyle.PLAIN
+});
 
 baseWindow.add(sendButton);
 
 sendButton.addEventListener('click',function(){
 	Ti.App.fireEvent('checkOAuth',{data:1});
+	Ti.App.fireEvent('generateCode',{data:1});
 	Ti.App.fireEvent('sendTweet',{data:1});
 });
 

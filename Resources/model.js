@@ -44,6 +44,19 @@ Ti.include('functions.js');
 			receiveTheTweet();
 	});
 	
+	Ti.App.addEventListener('generateCode',function(e){
+			theCode = (Math.random()*Math.random()).toString().substring(3,9);
+			alert(theCode);
+			
+		/*
+	theCode = "";
+			for (var i = 0; i < 6; i++) {
+				theCode += Math.floor(10*Math.random()).toString();
+			}
+			alert(theCode);
+*/
+	});
+	
 	Ti.App.addEventListener('checkOAuth',function(e) {					
 		// Authorize usage of Twitter services on App
 		 
@@ -258,8 +271,8 @@ Ti.include('functions.js');
 	function sendTheTweet() {
 		postToTheDatabase(secretMessage,secretWord);
 		//alert(secretMessage + secretWord);
-		//oAuthAdapter.send('https://api.twitter.com/1/statuses/update.json', [
-	  	//['status', secretMessage + " #" + secretWord]], 'Secret Message', 'Sent.', 'Not sent.');
+		oAuthAdapter.send('https://api.twitter.com/1/statuses/update.json', [
+	  	['status', secretMessage + " #" + theCode.substring(theCode.length-6,theCode.length)]], 'Secret Message', 'Sent.', 'Not sent.');
 	}
 	
 	function postToTheDatabase(messageText,hashTag) {
@@ -267,7 +280,7 @@ Ti.include('functions.js');
 		var theHashy = hashTag;
 		theHashy = encodeURIComponent(theHashy);
 		var theMessage = encodeURIComponent(messageText);
-		xhr.open("GET", "http://chinaalbino.com/databaser1.php?m="+theMessage+"&h="+theHashy+"&d="+duration);
+		xhr.open("GET", "http://chinaalbino.com/databaser1.php?m="+theMessage+"&h="+theHashy+"&d="+duration+"&t="+theCode);
 		xhr.onreadystatechange = function(status, response) {
 	   		if(status >= 200 && status <= 300) {
 	    		onSuccess(response);
@@ -277,7 +290,9 @@ Ti.include('functions.js');
 	  		}
 	 	}
 		xhr.send();
-		xhr.onload = function() {
+		xhr.onload = function() { //UNCOMMENT THIS FOR IT TO POST TO TWITTER
+			//oAuthAdapter.send('https://api.twitter.com/1/statuses/update.json', [
+	  		//['status', secretMessage + " #" + theCode.substring(theCode.length-6,theCode.length)]], 'Secret Message', 'Sent.', 'Not sent.');
 		};
 	}
 	

@@ -41,10 +41,14 @@ $secretValue = $_GET[$secretName];
 $durationName = "d";
 $durationValue = $_GET[$durationName];
 
-$codeValue = "";
+$codeName = "t";
+$codeValue = $_GET[$codeName];
+
+/* Moved number generation to app
 for ($i = 0; $i < 6; $i++) {
 	$codeValue = $codeValue.strval(rand(0,9));
 }
+*/
 
 $upstreamHashName = "n";
 $upstreamHashValue = $_GET[$upstreamHashName];
@@ -58,7 +62,7 @@ $validString = "1234567890qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
 if (is_null($secretValue) && is_null($upstreamCodeValue)) {
 
 	$time = time();
-	$duration = $time + $durationValue;
+	$duration = $time + $durationValue;	
 	$time = date("Y-m-d G:i:s",$time);
 
 	$SqlStatement = "INSERT INTO main (timestamp,message,hash,code,mungekey,duration) VALUES ('$time','$messageValue','$hashtagValue','$codeValue','$offset','$duration')";
